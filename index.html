@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0e7490">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="可回饋式衛教 App：流感與呼吸道感染的預防（第1組）">
+<title>流感與呼吸道感染預防｜可回饋式衛教 App</title>
+<style>
+  :root{
+    --brand:#0e7490; --brand-dark:#155e75; --brand-light:#e0f2fe;
+    --ok:#16a34a; --bad:#dc2626; --warn:#d97706;
+    --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --bg:#f1f5f9; --card:#ffffff;
+    --tab-h:62px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+    background:#cbd5e1; color:var(--ink); line-height:1.7;
+    font-size:16px; overscroll-behavior-y:none;
+  }
+  /* 手機版外框（桌機置中呈現手機寬度） */
+  .app{
+    max-width:430px; margin:0 auto; min-height:100vh;
+    background:var(--bg); position:relative;
+    box-shadow:0 0 40px rgba(15,23,42,.25);
+    padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));
+  }
+  /* ===== 頁首 ===== */
+  header{
+    background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+    color:#fff; padding:22px 18px 26px;
+    border-radius:0 0 22px 22px;
+  }
+  header .badge{
+    display:inline-block; background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.35);
+    padding:2px 12px; border-radius:999px; font-size:12.5px; letter-spacing:.5px;
+  }
+  header h1{margin:10px 0 4px; font-size:23px; line-height:1.4;}
+  header p{margin:0; font-size:13.5px; opacity:.92;}
+  header .members{margin-top:12px; font-size:12.5px; opacity:.85;}
+  /* ===== 頁面 ===== */
+  .page{display:none; padding:16px 14px 8px; animation:fade .28s ease;}
+  .page.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  .card{
+    background:var(--card); border:1px solid var(--line);
+    border-radius:16px; padding:16px 16px; margin-bottom:14px;
+    box-shadow:0 1px 3px rgba(15,23,42,.06);
+  }
+  .card h2{
+    margin:0 0 10px; font-size:17.5px; color:var(--brand-dark);
+    display:flex; align-items:center; gap:8px;
+  }
+  .card h3{margin:14px 0 6px; font-size:15.5px; color:var(--brand);}
+  .card p{margin:6px 0;}
+  .src{font-size:12px; color:var(--muted); margin-top:10px; border-top:1px dashed var(--line); padding-top:8px;}
+  .src a{color:var(--brand); text-decoration:none;}
+  ul.clean{margin:8px 0; padding-left:1.1em;}
+  ul.clean li{margin:5px 0;}
+  /* 目標 / 清單項目 */
+  .goal{
+    display:flex; gap:10px; align-items:flex-start;
+    background:var(--brand-light); border-radius:12px;
+    padding:11px 12px; margin:8px 0; font-size:14.5px;
+  }
+  .goal b.n{
+    flex:0 0 auto; width:24px; height:24px; border-radius:50%;
+    background:var(--brand); color:#fff; font-size:13px;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  /* 症狀膠囊 */
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .chip{
+    background:#fff7ed; border:1px solid #fed7aa; color:#9a3412;
+    padding:5px 12px; border-radius:999px; font-size:13.5px;
+  }
+  /* 預防 7 招 */
+  .tip{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .tip:last-child{border-bottom:none;}
+  .tip .ico{
+    flex:0 0 auto; width:42px; height:42px; border-radius:12px;
+    background:var(--brand-light); font-size:22px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tip h4{margin:0 0 3px; font-size:15.5px; color:var(--ink);}
+  .tip p{margin:0; font-size:13.8px; color:#475569;}
+  /* 就醫警訊 */
+  .danger{
+    background:#fef2f2; border:1px solid #fecaca;
+    border-radius:12px; padding:10px 12px; margin:7px 0;
+    font-size:14.5px; color:#991b1b; display:flex; gap:8px;
+  }
+  .danger::before{content:"⚠️";}
+  .highrisk{
+    background:#fffbeb; border:1px solid #fde68a; border-radius:12px;
+    padding:11px 12px; font-size:14px; color:#92400e; margin-top:10px;
+  }
+  /* ===== 測驗 ===== */
+  .qprogress{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:6px;}
+  .qprogress i{display:block; height:100%; width:20%; background:var(--brand); border-radius:99px; transition:width .35s;}
+  .qmeta{font-size:12.5px; color:var(--muted); margin-bottom:12px; display:flex; justify-content:space-between;}
+  .qtext{font-size:16.5px; font-weight:600; margin:4px 0 14px;}
+  .opt{
+    display:flex; gap:10px; align-items:center; width:100%;
+    background:#fff; border:2px solid var(--line); border-radius:12px;
+    padding:12px 13px; margin-bottom:10px; font-size:15px; text-align:left;
+    cursor:pointer; transition:.15s; color:var(--ink); font-family:inherit;
+  }
+  .opt:active{transform:scale(.985);}
+  .opt .k{
+    flex:0 0 auto; width:26px; height:26px; border-radius:8px;
+    background:var(--brand-light); color:var(--brand-dark);
+    font-weight:700; font-size:13.5px; display:flex; align-items:center; justify-content:center;
+  }
+  .opt.correct{border-color:var(--ok); background:#f0fdf4;}
+  .opt.correct .k{background:var(--ok); color:#fff;}
+  .opt.wrong{border-color:var(--bad); background:#fef2f2;}
+  .opt.wrong .k{background:var(--bad); color:#fff;}
+  .opt[disabled]{cursor:default; opacity:.9;}
+  .feedback{
+    border-radius:12px; padding:12px 13px; font-size:14.2px; margin-top:4px; display:none;
+  }
+  .feedback.show{display:block; animation:fade .25s;}
+  .feedback.good{background:#f0fdf4; border:1px solid #bbf7d0; color:#14532d;}
+  .feedback.bad{background:#fef2f2; border:1px solid #fecaca; color:#7f1d1d;}
+  .feedback .verdict{font-weight:700; font-size:15px; display:block; margin-bottom:4px;}
+  .btn{
+    display:block; width:100%; border:none; border-radius:12px;
+    background:var(--brand); color:#fff; font-size:16px; font-weight:600;
+    padding:13px; margin-top:12px; cursor:pointer; font-family:inherit;
+  }
+  .btn:active{background:var(--brand-dark);}
+  .btn.ghost{background:#fff; color:var(--brand); border:2px solid var(--brand);}
+  .scorebox{text-align:center; padding:10px 0 4px;}
+  .scorebox .big{font-size:56px; font-weight:800; color:var(--brand); line-height:1.2;}
+  .scorebox .rate{font-size:15px; color:var(--muted);}
+  .scorebox .msg{font-size:16px; margin-top:10px; font-weight:600;}
+  /* ===== 參考資料 ===== */
+  .ref{display:flex; gap:10px; padding:11px 0; border-bottom:1px solid var(--line); font-size:14px;}
+  .ref:last-child{border-bottom:none;}
+  .ref .no{
+    flex:0 0 auto; width:26px; height:26px; border-radius:8px;
+    background:var(--brand); color:#fff; font-size:13px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; margin-top:2px;
+  }
+  .ref .t{font-weight:600;}
+  .ref .u{font-size:12.6px; color:var(--muted); word-break:break-all;}
+  .ref a{color:var(--brand); text-decoration:none;}
+  .ref .why{font-size:12.8px; color:#475569; margin-top:2px;}
+  /* ===== 底部導覽 ===== */
+  nav.tabbar{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px; height:calc(var(--tab-h) + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);
+    background:#fff; border-top:1px solid var(--line);
+    display:flex; z-index:50; box-shadow:0 -4px 14px rgba(15,23,42,.07);
+  }
+  nav.tabbar button{
+    flex:1; border:none; background:none; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; font-size:11px; color:var(--muted); font-family:inherit; padding-top:6px;
+  }
+  nav.tabbar button .ti{font-size:21px; line-height:1; filter:grayscale(1); opacity:.65;}
+  nav.tabbar button.on{color:var(--brand); font-weight:700;}
+  nav.tabbar button.on .ti{filter:none; opacity:1; transform:translateY(-1px);}
+  .foot{font-size:11.5px; color:var(--muted); text-align:center; padding:8px 0 4px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <span class="badge">可回饋式衛教 ｜ 第 1 組</span>
+    <h1>流感與呼吸道感染的預防</h1>
+    <p>認識．預防．就醫．測驗 — 邊讀邊回饋</p>
+    <div class="members">組員：11322218 周郡玲 ｜ 11322256 黃鈺霖</div>
+  </header>
+
+  <!-- ========== 首頁：衛教目標 ========== -->
+  <section class="page active" id="page-home">
+    <div class="card">
+      <h2>🎯 衛教目標</h2>
+      <p>衛教後，民眾能夠：</p>
+      <div class="goal"><b class="n">1</b><span>認識<strong>流感及常見呼吸道感染的傳播方式</strong>。</span></div>
+      <div class="goal"><b class="n">2</b><span>說出至少 <strong>3 種</strong>預防呼吸道感染的方法。</span></div>
+      <div class="goal"><b class="n">3</b><span><strong>正確</strong>執行洗手、咳嗽禮節及口罩使用。</span></div>
+      <div class="goal"><b class="n">4</b><span><strong>知道</strong>出現哪些症狀時應就醫。</span></div>
+    </div>
+
+    <div class="card">
+      <h2>📖 本單元內容</h2>
+      <ul class="clean">
+        <li><a href="#" onclick="go('content');return false;" style="color:var(--brand);font-weight:600;">二、衛教內容</a>：什麼是流感、常見症狀、預防 7 招</li>
+        <li><a href="#" onclick="go('seek');return false;" style="color:var(--brand);font-weight:600;">三、何種情況需就醫</a>：危險徵兆與高風險族群</li>
+        <li><a href="#" onclick="go('quiz');return false;" style="color:var(--brand);font-weight:600;">四、可回饋式測驗</a>：5 題即時評量</li>
+        <li><a href="#" onclick="go('refs');return false;" style="color:var(--brand);font-weight:600;">參考資料來源</a>：5 個權威出處</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>💡 小提醒</h2>
+      <p>請先閱讀衛教內容，再進入測驗。答題時會<strong>立即回饋</strong>對錯與解析，幫助記憶。</p>
+      <button class="btn" onclick="go('content')">開始閱讀衛教內容</button>
+    </div>
+    <div class="foot">流感與呼吸道感染的預防 ｜ 可回饋式衛教 App</div>
+  </section>
+
+  <!-- ========== 衛教內容 ========== -->
+  <section class="page" id="page-content">
+    <div class="card">
+      <h2>🦠 1. 什麼是流感？</h2>
+      <p>流感是由<strong>流感病毒</strong>引起的急性呼吸道感染，主要透過感染者<strong>咳嗽、打噴嚏或說話</strong>產生的<strong>飛沫及呼吸道分泌物</strong>傳播。</p>
+      <h3>常見症狀</h3>
+      <div class="chips">
+        <span class="chip">🤒 發燒</span><span class="chip">🤕 頭痛</span>
+        <span class="chip">🤧 咳嗽</span><span class="chip">💪 肌肉痠痛</span>
+        <span class="chip">😖 喉嚨痛</span><span class="chip">😴 疲倦、倦怠</span>
+        <span class="chip">👃 鼻塞、流鼻水</span>
+      </div>
+      <div class="src">資料來源：衛生福利部疾病管制署、WHO 流感實況報導（見「參考資料」）。</div>
+    </div>
+
+    <div class="card">
+      <h2>🛡️ 2. 如何預防？（七招）</h2>
+
+      <div class="tip">
+        <div class="ico">🧼</div>
+        <div>
+          <h4>(1) 勤洗手</h4>
+          <p>使用<strong>肥皂及清水</strong>洗手，搓洗約 <strong>20 秒</strong>。</p>
+          <p>▸ 吃東西前 ｜ 飯後 ｜ 接觸公共場所物品後 ｜ 摸眼睛、鼻子、嘴巴前 ｜ 咳嗽、打噴嚏後</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="ico">🤧</div>
+        <div>
+          <h4>(2) 咳嗽禮節</h4>
+          <p>咳嗽或打噴嚏時：▸ 用<strong>衛生紙</strong>遮住口鼻 ｜ 使用過的衛生紙<strong>立即丟棄</strong> ｜ 沒有衛生紙時用<strong>衣袖</strong>遮住 ｜ 隨後<strong>洗手</strong></p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="ico">😷</div>
+        <div>
+          <h4>(3) 適當佩戴口罩</h4>
+          <p>在呼吸道感染流行期間、進入<strong>醫療院所</strong>或<strong>人潮密集場所</strong>時，可依當時防疫建議佩戴口罩。</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="ico">🪟</div>
+        <div>
+          <h4>(4) 保持室內通風</h4>
+          <p>適當開窗通風，降低呼吸道病原體在室內累積的機會。</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="ico">🚫👃</div>
+        <div>
+          <h4>(5) 避免接觸眼、鼻、口</h4>
+          <p>手部可能沾附病原體，應避免用未清潔的手觸摸臉部。</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="ico">🏠</div>
+        <div>
+          <h4>(6) 生病時減少外出</h4>
+          <p>若出現發燒、咳嗽等呼吸道症狀，應適度休息，避免前往人多的地方，並依需要就醫。</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="ico">💉</div>
+        <div>
+          <h4>(7) 接種流感疫苗</h4>
+          <p>流感疫苗是預防流感及<strong>降低重症風險</strong>的重要措施之一，符合公費接種資格者可依當年度<strong>衛生福利部疾病管制署</strong>公告接種。</p>
+        </div>
+      </div>
+
+      <div class="src">資料來源：衛生福利部疾病管制署（疾管署）預防接種專區、國民健康署健康九九⁺。</div>
+    </div>
+    <div class="foot">二、衛教內容</div>
+  </section>
+
+  <!-- ========== 就醫警訊 ========== -->
+  <section class="page" id="page-seek">
+    <div class="card">
+      <h2>🚑 三、何種情況需就醫？</h2>
+      <p>若出現以下情況，應<strong>儘速尋求醫療協助</strong>：</p>
+      <div class="danger">呼吸困難或喘</div>
+      <div class="danger">胸痛</div>
+      <div class="danger">意識改變或明顯嗜睡</div>
+      <div class="danger">持續高燒或症狀明顯惡化</div>
+      <div class="danger">嚴重脫水</div>
+      <div class="danger">原有慢性疾病明顯惡化</div>
+
+      <div class="highrisk">
+        ⚠️ <strong>高風險族群</strong>：幼兒、老人、孕婦及慢性疾病患者等較容易發生併發症的族群，更需要注意症狀變化。
+      </div>
+      <div class="src">資料來源：衛生福利部疾病管制署危險徵兆宣導、WHO 流感實況報導。</div>
+    </div>
+    <div class="foot">三、何種情況需就醫</div>
+  </section>
+
+  <!-- ========== 測驗 ========== -->
+  <section class="page" id="page-quiz">
+    <div class="card" id="quizCard">
+      <h2>📝 四、可回饋式測驗</h2>
+      <div class="qprogress"><i id="bar"></i></div>
+      <div class="qmeta"><span id="qcount">第 1 題 / 共 5 題</span><span id="qscore">得分：0</span></div>
+      <div id="quizBody">
+        <div class="qtext" id="qtext"></div>
+        <div id="qopts"></div>
+        <div class="feedback" id="fb"></div>
+        <button class="btn" id="nextBtn" style="display:none;" onclick="nextQ()">下一題 →</button>
+      </div>
+      <div id="quizResult" style="display:none;">
+        <div class="scorebox">
+          <div class="big" id="finalScore">0/5</div>
+          <div class="rate" id="finalRate"></div>
+          <div class="msg" id="finalMsg"></div>
+        </div>
+        <button class="btn" onclick="restart()">🔄 再測一次</button>
+        <button class="btn ghost" onclick="go('content')">📖 回頭複習內容</button>
+      </div>
+    </div>
+    <div class="foot">答題後立即顯示對錯與解析</div>
+  </section>
+
+  <!-- ========== 參考資料 ========== -->
+  <section class="page" id="page-refs">
+    <div class="card">
+      <h2>📚 參考資料來源（5 個）</h2>
+
+      <div class="ref">
+        <div class="no">1</div>
+        <div>
+          <div class="t">衛生福利部疾病管制署（CDC）</div>
+          <div class="u"><a href="https://www.cdc.gov.tw/" target="_blank" rel="noopener">https://www.cdc.gov.tw/</a></div>
+          <div class="why">國內流感疫情、疫苗與預防接種、手部衛生及口罩防疫建議之主管機關資訊。（查閱日期：2026-11-25）</div>
+        </div>
+      </div>
+
+      <div class="ref">
+        <div class="no">2</div>
+        <div>
+          <div class="t">衛生福利部（MOHW）</div>
+          <div class="u"><a href="https://www.mohw.gov.tw/" target="_blank" rel="noopener">https://www.mohw.gov.tw/</a></div>
+          <div class="why">部長政策宣導與「衛教視窗」宣傳資訊，含流感防疫與疫苗接種呼籲。（查閱日期：2026-11-25）</div>
+        </div>
+      </div>
+
+      <div class="ref">
+        <div class="no">3</div>
+        <div>
+          <div class="t">衛生福利部國民健康署｜健康九九⁺網站</div>
+          <div class="u"><a href="https://health99.hpa.gov.tw/" target="_blank" rel="noopener">https://health99.hpa.gov.tw/</a></div>
+          <div class="why">民眾健康促進與呼吸道感染預防之衛教文章、健康檢測與衛教資源。（查閱日期：2026-11-25）</div>
+        </div>
+      </div>
+
+      <div class="ref">
+        <div class="no">4</div>
+        <div>
+          <div class="t">World Health Organization（WHO）. <em>Influenza (seasonal)</em> [Fact sheet]</div>
+          <div class="u"><a href="https://www.who.int/news-room/fact-sheets/detail/influenza-(seasonal)" target="_blank" rel="noopener">https://www.who.int/news-room/fact-sheets/detail/influenza-(seasonal)</a></div>
+          <div class="why">流感症狀、飛沫傳播途徑、高風險族群與疫苗預防建議（更新日期：2025-02-28）。</div>
+        </div>
+      </div>
+
+      <div class="ref">
+        <div class="no">5</div>
+        <div>
+          <div class="t">U.S. Centers for Disease Control and Prevention（CDC）. <em>Influenza (Flu)</em></div>
+          <div class="u"><a href="https://www.cdc.gov/flu/" target="_blank" rel="noopener">https://www.cdc.gov/flu/</a></div>
+          <div class="why">流感症狀、併發症高風險族群、預防策略（洗手、咳嗽禮節、口罩）與疫苗資訊。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">以上 5 個網址於 2026-11-25 驗證可連線</div>
+  </section>
+
+  <!-- ========== 底部導覽 ========== -->
+  <nav class="tabbar">
+    <button class="on" data-tab="home" onclick="go('home')"><span class="ti">🏠</span>首頁</button>
+    <button data-tab="content" onclick="go('content')"><span class="ti">📖</span>衛教內容</button>
+    <button data-tab="seek" onclick="go('seek')"><span class="ti">🚑</span>就醫警訊</button>
+    <button data-tab="quiz" onclick="go('quiz')"><span class="ti">📝</span>測驗</button>
+    <button data-tab="refs" onclick="go('refs')"><span class="ti">📚</span>參考資料</button>
+  </nav>
+
+</div>
+
+<script>
+/* ===== 頁面切換 ===== */
+function go(tab){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page-'+tab).classList.add('active');
+  document.querySelectorAll('nav.tabbar button').forEach(function(b){
+    b.classList.toggle('on', b.dataset.tab===tab);
+  });
+  window.scrollTo(0,0);
+  if(tab==='quiz' && !started){ started=true; render(); }
+}
+
+/* ===== 可回饋式測驗 ===== */
+var questions=[
+  {q:"Q1. 下列哪一項是預防呼吸道感染的重要方法？",
+   o:["不需要洗手","勤洗手","咳嗽時用手掌摀嘴","生病時仍到人多的地方"],a:1,
+   e:"勤洗手可清除手上病原體，是預防呼吸道感染最重要的基本動作之一。"},
+  {q:"Q2. 咳嗽或打噴嚏時，最適當的做法是？",
+   o:["用手直接摀住嘴巴","不需要遮掩","用衛生紙或衣袖遮住口鼻","朝旁邊的人咳嗽"],a:2,
+   e:"應以衛生紙遮住口鼻；沒有衛生紙時用衣袖遮住，並於事後洗手。用手掌摀住反而容易將病原體傳播出去。"},
+  {q:"Q3. 下列何者屬於需要特別注意流感併發症的族群？",
+   o:["高齡者","幼兒","孕婦","以上皆是"],a:3,
+   e:"幼兒、老人、孕婦及慢性疾病患者皆屬較易發生併發症的高風險族群。"},
+  {q:"Q4.（是非題）流感患者即使有明顯症狀，也應照常到人多的地方活動。",
+   o:["⭕ 對","❌ 錯"],a:1,
+   e:"有呼吸道症狀時應適度休息並減少與他人接觸，以降低疾病傳播機會。"},
+  {q:"Q5.（是非題）保持室內適當通風，有助於降低呼吸道感染傳播的風險。",
+   o:["⭕ 對","❌ 錯"],a:0,
+   e:"適當開窗通風可降低呼吸道病原體在室內累積的機會，正確。"}
+];
+var idx=0, score=0, answered=false, started=false;
+var LETTERS=["A","B","C","D"];
+
+function render(){
+  var q=questions[idx];
+  document.getElementById('bar').style.width=((idx)/questions.length*100+ (idx?0:0))+"%";
+  document.getElementById('qcount').textContent="第 "+(idx+1)+" 題 / 共 "+questions.length+" 題";
+  document.getElementById('qscore').textContent="得分："+score;
+  document.getElementById('qtext').textContent=q.q;
+  answered=false;
+  var box=document.getElementById('qopts'); box.innerHTML="";
+  q.o.forEach(function(text,i){
+    var b=document.createElement('button');
+    b.className="opt"; b.type="button";
+    b.innerHTML='<span class="k">'+LETTERS[i]+'</span><span>'+text+'</span>';
+    b.onclick=function(){ pick(i,b); };
+    box.appendChild(b);
+  });
+  document.getElementById('fb').className="feedback";
+  document.getElementById('fb').classList.remove('show');
+  document.getElementById('nextBtn').style.display="none";
+  document.getElementById('nextBtn').textContent = (idx===questions.length-1)?"看成績 →":"下一題 →";
+}
+
+function pick(i,btn){
+  if(answered) return;
+  answered=true;
+  var q=questions[idx];
+  var opts=document.querySelectorAll('#qopts .opt');
+  opts.forEach(function(o){o.disabled=true;});
+  opts[q.a].classList.add('correct');
+  var ok = (i===q.a);
+  if(!ok){ btn.classList.add('wrong'); }
+  else { score++; }
+  var fb=document.getElementById('fb');
+  fb.className="feedback show "+(ok?"good":"bad");
+  fb.innerHTML='<span class="verdict">'+(ok?"✅ 答對了！":"❌ 答錯了！正確答案："+LETTERS[q.a])+'</span>'+q.e;
+  document.getElementById('qscore').textContent="得分："+score;
+  document.getElementById('nextBtn').style.display="block";
+}
+
+function nextQ(){
+  if(idx<questions.length-1){ idx++; render(); }
+  else{ showResult(); }
+  window.scrollTo(0,0);
+}
+
+function showResult(){
+  document.getElementById('quizBody').style.display="none";
+  document.getElementById('quizResult').style.display="block";
+  document.getElementById('bar').style.width="100%";
+  document.getElementById('finalScore').textContent=score+"/"+questions.length;
+  var pct=score/questions.length;
+  document.getElementById('finalRate').textContent="正確率 "+Math.round(pct*100)+"%";
+  var msg = pct===1 ? "🎉 滿分！你完全掌握流感預防重點！"
+          : pct>=0.8 ? "👏 很棒！再複習一下細節就完美了。"
+          : pct>=0.6 ? "🙂 及格！建議回頭複習衛教內容再挑戰一次。"
+          : "💪 加油！請先閱讀衛教內容，再重新測驗。";
+  document.getElementById('finalMsg').textContent=msg;
+}
+
+function restart(){
+  idx=0; score=0;
+  document.getElementById('quizBody').style.display="block";
+  document.getElementById('quizResult').style.display="none";
+  render();
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
